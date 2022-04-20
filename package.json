@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@bulatdashiev/svelte-slider": "^1.0.3",
+    "@lukeed/uuid": "^2.0.0",
     "autoprefixer": "^10.4.4",
     "postcss": "^8.4.12",
     "sirv-cli": "^2.0.0",

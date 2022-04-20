@@ -1,100 +1,106 @@
 <script>
 	import Slider from "@bulatdashiev/svelte-slider";
-	import { spring, tweened } from "svelte/motion";
+	import ColorPicker from "./ColorPicker.svelte";
 	import Pie from "./Pie.svelte";
 	const size = 400;
 	const inset = 29;
 	const thickness = 50;
-	const root = document.documentElement;
 
 	const twoDigits = (n) => (n > 9 ? Math.floor(n) : "0" + Math.floor(n));
-	const HHMM = (h) => {
+	function HHMM(h) {
 		let H = Math.floor(h);
 		let M = (h * 60) % 60;
 		return `${twoDigits(H)}:${twoDigits(M)}`;
-	};
+	}
+	const parseHHMM = (s) => +s.split(":")[0] + +s.split(":")[1] / 60;
 
 	const TimeObject = (name, color, range) => ({
 		name,
 		color,
 		range,
-		offset: 0,
-		get startTime() {
-			return this.range[0] % 24;
-		},
-		get endTime() {
-			return this.range[1] % 24;
-		},
 		get start() {
-			return ((this.range[0] + this.offset) % 24) / 24;
+			console.log;
+			return this.range[0] / 24;
 		},
 		get end() {
-			return ((this.range[1] + this.offset) % 24) / 24;
+			return this.range[1] / 24;
 		},
 	});
 
-	function rotateTo0(tobjs) {
-		let offset = 0;
-		for (let tobj of tobjs) {
-			if (tobj.startTime > tobj.endTime) {
-				offset = 24 - tobj.startTime;
-			}
-		}
-		for (let tobj of tobjs) tobj.offset = offset;
-		return -offset;
-	}
-
-	let tobjs = [TimeObject("test", "blue", [0, 16])];
-	let offset = 0;
-	$: offset = rotateTo0(tobjs);
+	let tobjs = [
+		TimeObject("sleep", "blue", [0 + 0 / 60, 7 + 0 / 60]),
+		TimeObject("school", "red", [8 + 30 / 60, 14 + 45 / 60]),
+		TimeObject("swimming", "green", [17 + 20 / 60, 19 + 15 / 60]),
+	];
 </script>
 
 <div
 	class="
 	 bg-gradient-to-t from-primary-900 to-secondary-900
 	 center
-	 h-screen
+	 min-h-screen
 	 overflow-auto"
 >
-	<div class="w-full max-w-xl">
+	<div class="w-full max-w-xl pb-5 flex flex-col gap-3">
 		<h1 class="text-center">Time visualizer</h1>
 
 		{#each tobjs as tobj}
-			{tobj.name}:
-			{HHMM(tobj.startTime)} -
-			{HHMM(tobj.endTime)}
-			<div
-				class="w-full"
-				style={`--progress-bg: ${
-					tobj.range[0] <= tobj.range[1] ? "#ff9355" : "white"
-				};
+			<div>
+				<div class="flex gap-3">
+					<input
+						class="bg-neutral-100/10 pl-1 w-32"
+						bind:value={tobj.name}
+					/>
+					<div>
+						<input
+							class="bg-neutral-100/10"
+							type="time"
+							value={HHMM(tobj.start * 24)}
+							on:input={(e) =>
+								(tobj.range[0] = parseHHMM(e.target.value))}
+						/>
+						-
+						<input
+							class="bg-neutral-100/10 p.1"
+							type="time"
+							value={HHMM(tobj.end * 24)}
+							on:input={(e) =>
+								(tobj.range[1] = parseHHMM(e.target.value))}
+						/>
+					</div>
+					<ColorPicker bind:value={tobj.color} />
+				</div>
+				<div
+					class="w-full"
+					style={`--progress-bg: ${
+						tobj.range[0] <= tobj.range[1] ? "#ff9355" : "white"
+					};
 			--track-bg: ${tobj.range[0] <= tobj.range[1] ? "white" : "#ff9355"};
 			`}
-			>
-				<Slider
-					step="0.25"
-					bind:value={tobj.range}
-					max="24"
-					range={tobj.range}
 				>
-					<span slot="left" style="font-size: 20px;">&#9193;</span>
-					<span slot="right" style="font-size: 20px;">&#9194;</span>
-				</Slider>
+					<Slider
+						step="0.25"
+						bind:value={tobj.range}
+						max="24"
+						range={tobj.range}
+					>
+						<span slot="left" style="font-size: 20px;">&#9193;</span
+						>
+						<span slot="right" style="font-size: 20px;"
+							>&#9194;</span
+						>
+					</Slider>
+				</div>
 			</div>
 		{/each}
 
 		<div class="flex">
 			<div
 				class="clock center"
-				style={`width: ${size}px; height: ${size}px`}
+				style={`min-width: ${size}px; min-height: ${size}px`}
 			>
-				<span style="opacity:0.5">
-					<Pie
-						size={size - inset}
-						{tobjs}
-						rotate={270 + (offset / 24) * 360}
-						{thickness}
-					/>
+				<span>
+					<Pie size={size - inset} {tobjs} {thickness} />
 				</span>
 			</div>
 			<div>
@@ -109,6 +115,12 @@
 						</div>
 					{/if}
 				{/each}
+				<button
+					class="bg-neutral-100/10 p-1 rounded border-2 m-2"
+					on:click={() =>
+						(tobjs = [...tobjs, TimeObject("", "", [0, 0])])}
+					>new</button
+				>
 			</div>
 		</div>
 	</div>
@@ -133,7 +145,9 @@
 	* {
 		border-color: white;
 	}
-
+	circle {
+		mix-blend-mode: lighten;
+	}
 	.center {
 		display: flex;
 		align-items: center;
