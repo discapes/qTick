@@ -27,11 +27,23 @@
 		},
 	});
 
-	let tobjs = [
-		TimeObject("sleep", "blue", [0 + 0 / 60, 7 + 0 / 60]),
-		TimeObject("school", "red", [8 + 30 / 60, 14 + 45 / 60]),
-		TimeObject("swimming", "green", [17 + 20 / 60, 19 + 15 / 60]),
-	];
+	let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+	let weekday = "Mon";
+	let tobjs;
+	function loadTobjs() {
+		tobjs = JSON.parse(localStorage.getItem("tobjs-" + weekday)).map(tobj => TimeObject(tobj.name, tobj.color, tobj.range));
+		if (!tobjs)
+			tobjs = [
+				TimeObject("sleep", "blue", [0 + 0 / 60, 7 + 0 / 60]),
+				TimeObject("school", "red", [8 + 30 / 60, 14 + 45 / 60]),
+				TimeObject("swimming", "green", [17 + 20 / 60, 19 + 15 / 60]),
+			];
+	}
+	function saveTobjs(tobjs) {
+		localStorage.setItem('tobjs-' + weekday, JSON.stringify(tobjs));
+	}
+	$: weekday, loadTobjs();
+	$: saveTobjs(tobjs);
 </script>
 
 <div
@@ -43,17 +55,29 @@
 >
 	<div class="w-full max-w-xl pb-5 flex flex-col gap-3">
 		<h1 class="text-center">Time visualizer</h1>
-
-		{#each tobjs as tobj}
+		<div class="flex gap-3">
+			{#each weekdays as day}
+				<button
+					class={`w-full bg-neutral-100/10 ${
+						weekday === day
+							? "bg-transparent"
+							: "hover:bg-neutral-100/20"
+					}`}
+					on:click={() => (weekday = day)}>{day}</button
+				>
+			{/each}
+		</div>
+		<br />
+		{#each tobjs as tobj, i}
 			<div>
 				<div class="flex gap-3">
 					<input
-						class="bg-neutral-100/10 pl-1 w-32"
+						class="bg-neutral-100/10 pl-1 w-32 hover:bg-neutral-100/20"
 						bind:value={tobj.name}
 					/>
 					<div>
 						<input
-							class="bg-neutral-100/10"
+							class="bg-neutral-100/10 hover:bg-neutral-100/20"
 							type="time"
 							value={HHMM(tobj.start * 24)}
 							on:input={(e) =>
@@ -61,7 +85,7 @@
 						/>
 						-
 						<input
-							class="bg-neutral-100/10 p.1"
+							class="bg-neutral-100/10 p.1 hover:bg-neutral-100/20"
 							type="time"
 							value={HHMM(tobj.end * 24)}
 							on:input={(e) =>
@@ -69,6 +93,13 @@
 						/>
 					</div>
 					<ColorPicker bind:value={tobj.color} />
+					<button
+						class="hover:bg-neutral-100/20 bg-neutral-100/10 h-[24px] w-[24px]"
+						on:click={() => {
+							tobjs.splice(i, 1);
+							tobjs = tobjs;
+						}}>X</button
+					>
 				</div>
 				<div
 					class="w-full"
