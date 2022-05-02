@@ -31,7 +31,8 @@
 	let weekday = "Mon";
 	let tobjs;
 	function loadTobjs() {
-		tobjs = JSON.parse(localStorage.getItem("tobjs-" + weekday)).map(tobj => TimeObject(tobj.name, tobj.color, tobj.range));
+		let local = localStorage.getItem("tobjs-" + weekday);
+		if (local) tobjs = JSON.parse(local).map(tobj => TimeObject(tobj.name, tobj.color, tobj.range));
 		if (!tobjs)
 			tobjs = [
 				TimeObject("sleep", "blue", [0 + 0 / 60, 7 + 0 / 60]),
