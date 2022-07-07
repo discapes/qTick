@@ -55,7 +55,7 @@
 	 overflow-auto"
 >
 	<div class="w-full max-w-xl pb-5 flex flex-col gap-3">
-		<h1 class="text-center">Time visualizer</h1>
+		<h1 class="text-center text-5xl">qTick: Time visualizer</h1>
 		<div class="flex gap-3">
 			{#each weekdays as day}
 				<button
