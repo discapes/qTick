@@ -177,9 +177,6 @@
 	* {
 		border-color: white;
 	}
-	circle {
-		mix-blend-mode: lighten;
-	}
 	.center {
 		display: flex;
 		align-items: center;
